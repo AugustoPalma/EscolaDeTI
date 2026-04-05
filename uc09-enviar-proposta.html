@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>UC09 — Enviar Proposta</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid:  #2d6a4f;
+      --green-bright: #52b788;
+      --green-light: #b7e4c7;
+      --accent: #f4a261;
+      --accent-soft: #fde8d0;
+      --bg: #f0f7f2;
+      --card-bg: #ffffff;
+      --text-main: #1a2e22;
+      --text-muted: #6b8c78;
+      --border: #d8eddf;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: var(--sans);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: var(--green-deep);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar .brand {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--green-light);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .topbar .uc-badges {
+      display: flex;
+      gap: 8px;
+    }
+    .uc-badge {
+      background: var(--green-mid);
+      color: var(--green-light);
+      font-family: var(--mono);
+      font-size: .65rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-deep) 100%);
+      padding: 40px 24px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: rgba(82,183,136,.15);
+      border-radius: 50%;
+      top: -80px; right: -60px;
+    }
+    .page-header h1 {
+      font-family: var(--mono);
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .page-header p {
+      color: var(--green-light);
+      font-size: .88rem;
+      margin: 0;
+      position: relative;
+    }
+    .step-pills {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 24px;
+      padding: 6px 14px;
+      font-size: .78rem;
+      color: #fff;
+      transition: all .2s;
+    }
+    .step-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--green-deep);
+      font-weight: 600;
+    }
+    .step-pill .num {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      font-family: var(--mono);
+    }
+    .step-pill.active .num {
+      background: var(--green-deep);
+      color: #fff;
+    }
+    .step-pill.done { background: rgba(82,183,136,.3); border-color: var(--green-bright); }
+    .step-pill.done .num { background: var(--green-bright); color: var(--green-deep); }
+
+    /* ── MAIN CONTENT ── */
+    .main-wrap { padding: 28px 16px 60px; max-width: 860px; margin: 0 auto; }
+
+    /* ── OFFER CARD ── */
+    .offer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(26,58,42,.06);
+    }
+    .offer-thumb {
+      width: 72px; height: 72px;
+      border-radius: 10px;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .offer-meta .tag {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: .68rem;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .offer-meta h5 {
+      font-size: .98rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .offer-meta .sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .offer-meta .sub i { margin-right: 4px; }
+    .status-chip {
+      margin-left: auto;
+      background: #fff7ed;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-size: .72rem;
+      font-family: var(--mono);
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    /* ── SECTION CARD ── */
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(26,58,42,.06);
+    }
+    .section-title {
+      font-family: var(--mono);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--green-mid);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── KYC BADGE ── */
+    .kyc-banner {
+      background: linear-gradient(135deg, #e8f8ef 0%, #d4f0e1 100%);
+      border: 1.5px solid var(--green-bright);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .kyc-icon {
+      width: 40px; height: 40px;
+      background: var(--green-mid);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .kyc-banner h6 { margin: 0 0 2px; font-weight: 600; color: var(--green-deep); font-size: .88rem; }
+    .kyc-banner p  { margin: 0; font-size: .76rem; color: var(--green-mid); }
+    .kyc-chip {
+      margin-left: auto;
+      background: var(--green-mid);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: .62rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+
+    /* ── PRICE FIELD ── */
+    .price-input-wrap {
+      position: relative;
+      margin-bottom: 6px;
+    }
+    .price-prefix {
+      position: absolute;
+      left: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--green-mid);
+      pointer-events: none;
+    }
+    .price-input-wrap input {
+      font-family: var(--mono);
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      padding: 18px 50px 18px 48px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text-main);
+      transition: border-color .2s;
+    }
+    .price-input-wrap input:focus {
+      outline: none;
+      border-color: var(--green-bright);
+      background: #fff;
+    }
+    .price-suffix {
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--mono);
+      font-size: .72rem;
+      color: var(--text-muted);
+    }
+    .price-hint {
+      font-size: .76rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .price-hint i { color: var(--green-bright); margin-right: 4px; }
+
+    /* ── RANGE SLIDER ── */
+    .range-wrap { padding: 4px 0 8px; }
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: .72rem;
+      font-family: var(--mono);
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--green-mid);
+      cursor: pointer;
+    }
+    .range-fill-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      position: relative;
+      margin: 6px 0 4px;
+    }
+    .range-fill-bar .fill {
+      height: 100%;
+      background: var(--green-bright);
+      border-radius: 4px;
+      width: 40%;
+      transition: width .2s;
+    }
+
+    /* ── QUICK BID CHIPS ── */
+    .quick-bids {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    .quick-bid {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 6px 16px;
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .quick-bid:hover, .quick-bid.selected {
+      background: var(--green-mid);
+      border-color: var(--green-mid);
+      color: #fff;
+    }
+
+    /* ── FIELD LABEL ── */
+    .field-label {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    /* ── TEXTAREA ── */
+    .obs-input {
+      width: 100%;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: var(--sans);
+      font-size: .88rem;
+      background: var(--bg);
+      color: var(--text-main);
+      resize: vertical;
+      min-height: 90px;
+      transition: border-color .2s;
+    }
+    .obs-input:focus {
+      outline: none;
+      border-color: var(--green-bright);
+      background: #fff;
+    }
+
+    /* ── SUMMARY PANEL ── */
+    .summary-panel {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .83rem;
+    }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .label { color: var(--text-muted); }
+    .summary-row .value {
+      font-family: var(--mono);
+      font-size: .8rem;
+      color: var(--text-main);
+      font-weight: 700;
+    }
+    .summary-row .value.green { color: var(--green-mid); }
+    .summary-row .value.accent { color: var(--accent); }
+    .summary-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0 0;
+      margin-top: 4px;
+    }
+    .summary-total .label {
+      font-weight: 600;
+      font-size: .88rem;
+      color: var(--text-main);
+    }
+    .summary-total .value {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--green-deep);
+    }
+
+    /* ── LANCES RECENTES ── */
+    .bid-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .bid-item:last-child { border-bottom: none; }
+    .bid-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem;
+      flex-shrink: 0;
+    }
+    .bid-info { flex: 1; }
+    .bid-info .bid-name { font-size: .85rem; font-weight: 600; }
+    .bid-info .bid-time { font-size: .72rem; color: var(--text-muted); }
+    .bid-value {
+      font-family: var(--mono);
+      font-size: .9rem;
+      font-weight: 700;
+      color: var(--green-mid);
+    }
+    .bid-rank {
+      font-family: var(--mono);
+      font-size: .62rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .bid-rank.first {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ── ESG STRIP ── */
+    .esg-strip {
+      background: linear-gradient(90deg, var(--green-deep) 0%, var(--green-mid) 100%);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .esg-strip i { font-size: 1.6rem; color: var(--green-light); }
+    .esg-strip .esg-label { font-size: .72rem; color: var(--green-light); font-family: var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .esg-strip .esg-value { font-size: 1rem; font-weight: 600; margin-top: 2px; }
+
+    /* ── BUTTONS ── */
+    .btn-primary-green {
+      background: var(--green-mid);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: .92rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+      margin-bottom: 10px;
+    }
+    .btn-primary-green:hover {
+      background: var(--green-deep);
+      box-shadow: 0 4px 16px rgba(45,106,79,.3);
+    }
+    .btn-secondary-outline {
+      background: transparent;
+      color: var(--green-mid);
+      border: 2px solid var(--green-mid);
+      border-radius: 12px;
+      padding: 13px 24px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: .92rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-secondary-outline:hover {
+      background: var(--green-mid);
+      color: #fff;
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: var(--green-deep);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-family: var(--sans);
+      font-weight: 700;
+      font-size: 1rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+    }
+    .btn-accent:hover {
+      background: #e8914d;
+      box-shadow: 0 4px 20px rgba(244,162,97,.4);
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(26,58,42,.85);
+      z-index: 9998;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .success-overlay.show { display: flex; }
+    .success-modal {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 36px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: popIn .3s ease;
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .success-modal .big-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, var(--green-mid), var(--green-bright));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      margin: 0 auto 20px;
+      box-shadow: 0 8px 24px rgba(45,106,79,.3);
+    }
+    .success-modal h4 { font-family: var(--mono); font-size: 1rem; color: var(--green-deep); margin-bottom: 8px; }
+    .success-modal p { font-size: .85rem; color: var(--text-muted); margin-bottom: 20px; }
+    .lance-code {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-family: var(--mono);
+      font-size: .88rem;
+      color: var(--green-deep);
+      font-weight: 700;
+      letter-spacing: .12em;
+      margin-bottom: 20px;
+    }
+
+    /* ── TOAST ── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      min-width: 280px;
+    }
+    .toast-msg {
+      background: var(--green-deep);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(26,58,42,.3);
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 576px) {
+      .offer-card { flex-wrap: wrap; }
+      .status-chip { margin-left: 0; }
+      .kyc-chip { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <span class="brand">♻ Plataforma de Sucata</span>
+  <div class="uc-badges">
+    <span class="uc-badge">UC-09</span>
+  </div>
+</div>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1><i class="bi bi-send-fill" style="font-size:1rem; margin-right:8px;"></i>UC-09 — Enviar Proposta</h1>
+  <p>Coletor · Informe seu lance para a oferta selecionada</p>
+  <div class="step-pills">
+    <div class="step-pill done">
+      <div class="num"><i class="bi bi-check" style="font-size:.55rem;"></i></div>
+      Acessar Oferta
+    </div>
+    <div class="step-pill active">
+      <div class="num">2</div>
+      Informar Proposta
+    </div>
+    <div class="step-pill">
+      <div class="num">3</div>
+      Validar KYC
+    </div>
+    <div class="step-pill">
+      <div class="num">4</div>
+      Registrar Lance
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- KYC STATUS -->
+  <div class="kyc-banner">
+    <div class="kyc-icon"><i class="bi bi-shield-check"></i></div>
+    <div>
+      <h6>Conta Validada — KYC Aprovado</h6>
+      <p>Pré-condição confirmada · Coletor habilitado para enviar propostas</p>
+    </div>
+    <div class="kyc-chip">✔ VERIFICADO</div>
+  </div>
+
+  <!-- OFERTA SELECIONADA -->
+  <div class="offer-card">
+    <div class="offer-thumb">🖥️</div>
+    <div class="offer-meta flex-grow-1">
+      <span class="tag">Hardware</span>
+      <h5>Lote de Equipamentos — Servidores e Monitores</h5>
+      <div class="sub">
+        <i class="bi bi-geo-alt"></i> São Paulo, SP &nbsp;·&nbsp;
+        <i class="bi bi-box-seam"></i> 12 unidades &nbsp;·&nbsp;
+        <i class="bi bi-calendar3"></i> Publicado há 2 dias
+      </div>
+    </div>
+    <div class="status-chip">ABERTA</div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- COLUNA ESQUERDA: Formulário de Proposta -->
+    <div class="col-md-6">
+
+      <!-- VALOR DA PROPOSTA -->
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-currency-dollar text-success"></i> Valor da Proposta</div>
+
+        <label class="field-label">Seu lance (R$)</label>
+        <div class="price-input-wrap">
+          <span class="price-prefix">R$</span>
+          <input type="number" id="priceInput" value="850" min="100" max="5000" step="50"
+                 oninput="updateFromInput()" />
+          <span class="price-suffix">/lote</span>
+        </div>
+        <p class="price-hint"><i class="bi bi-info-circle"></i> Lance mínimo: R$ 300,00 · Lance atual mais alto: R$ 920,00</p>
+
+        <div class="range-wrap mt-3">
+          <div class="range-labels">
+            <span>R$ 300</span>
+            <span id="rangeLabel">R$ 850</span>
+            <span>R$ 5.000</span>
+          </div>
+          <input type="range" id="priceRange" min="300" max="5000" step="50" value="850"
+                 oninput="updateFromRange()" />
+        </div>
+
+        <p class="field-label mt-3">Sugestões rápidas</p>
+        <div class="quick-bids">
+          <button class="quick-bid" onclick="setQuickBid(500)">R$ 500</button>
+          <button class="quick-bid" onclick="setQuickBid(750)">R$ 750</button>
+          <button class="quick-bid selected" onclick="setQuickBid(850)">R$ 850</button>
+          <button class="quick-bid" onclick="setQuickBid(1000)">R$ 1.000</button>
+          <button class="quick-bid" onclick="setQuickBid(1500)">R$ 1.500</button>
+        </div>
+      </div>
+
+      <!-- OBSERVAÇÕES -->
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-chat-text text-success"></i> Observações</div>
+        <label class="field-label">Mensagem para o anunciante (opcional)</label>
+        <textarea class="obs-input" placeholder="Ex: Posso retirar em até 48h. Tenho veículo próprio para o transporte do lote..."></textarea>
+
+        <label class="field-label mt-3">Prazo de coleta</label>
+        <div class="price-input-wrap">
+          <span class="price-prefix" style="font-size:.85rem; color:var(--text-muted);">⏱</span>
+          <input type="text" style="font-family:var(--sans); font-size:.92rem; font-weight:500; padding:14px 16px 14px 40px;"
+                 placeholder="Ex: Em até 3 dias úteis" />
+        </div>
+      </div>
+
+    </div>
+
+    <!-- COLUNA DIREITA: Resumo + Lances -->
+    <div class="col-md-6">
+
+      <!-- RESUMO DO LANCE -->
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-receipt text-success"></i> Resumo da Proposta</div>
+        <div class="summary-panel">
+          <div class="summary-row">
+            <span class="label">Oferta</span>
+            <span class="value">Servidores e Monitores</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Quantidade</span>
+            <span class="value">12 unidades</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Seu lance</span>
+            <span class="value accent" id="summaryBid">R$ 850,00</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Lance mais alto</span>
+            <span class="value">R$ 920,00</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Sua posição</span>
+            <span class="value">2º lugar</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">KYC</span>
+            <span class="value green">✔ VALIDADO</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Status</span>
+            <span class="value green" id="summaryStatus">Pronto para enviar</span>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn-secondary-outline" style="font-size:.82rem; padding:10px;" onclick="showToast('📋 Proposta salva como rascunho!')">
+            <i class="bi bi-floppy"></i> Salvar Rascunho
+          </button>
+          <button class="btn-secondary-outline" style="font-size:.82rem; padding:10px;" onclick="showToast('🔔 Alerta configurado!')">
+            <i class="bi bi-bell"></i> Alertar-me
+          </button>
+        </div>
+      </div>
+
+      <!-- LANCES RECENTES -->
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-bar-chart-steps text-success"></i> Lances Recentes</div>
+
+        <div class="bid-item">
+          <div class="bid-avatar">🏭</div>
+          <div class="bid-info">
+            <div class="bid-name">MetalRecicla Ltda.</div>
+            <div class="bid-time">há 18 min</div>
+          </div>
+          <div class="bid-value">R$ 920</div>
+          <div class="bid-rank first">1º</div>
+        </div>
+        <div class="bid-item">
+          <div class="bid-avatar">♻️</div>
+          <div class="bid-info">
+            <div class="bid-name">Você (RecicloTech)</div>
+            <div class="bid-time">Proposta atual</div>
+          </div>
+          <div class="bid-value" id="myBidValue" style="color:var(--accent);">R$ 850</div>
+          <div class="bid-rank">2º</div>
+        </div>
+        <div class="bid-item">
+          <div class="bid-avatar">🔧</div>
+          <div class="bid-info">
+            <div class="bid-name">EcoPartes S/A</div>
+            <div class="bid-time">há 1h 45min</div>
+          </div>
+          <div class="bid-value">R$ 700</div>
+          <div class="bid-rank">3º</div>
+        </div>
+        <div class="bid-item">
+          <div class="bid-avatar">💻</div>
+          <div class="bid-info">
+            <div class="bid-name">TechSucata ME</div>
+            <div class="bid-time">há 3h 12min</div>
+          </div>
+          <div class="bid-value">R$ 490</div>
+          <div class="bid-rank">4º</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /row -->
+
+  <!-- ESG STRIP -->
+  <div class="esg-strip mt-3">
+    <i class="bi bi-recycle"></i>
+    <div class="flex-grow-1">
+      <div class="esg-label">Impacto ESG estimado ao arrematar este lote</div>
+      <div class="esg-value">≈ 54 kg de resíduos eletrônicos desviados de aterro sanitário</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:.68rem; color:var(--green-light); font-family:var(--mono);">MÉTRICA UC-16</div>
+      <div style="font-size:.95rem; font-weight:700;">+ 680 pts</div>
+    </div>
+  </div>
+
+  <!-- SUBMIT BUTTON -->
+  <button class="btn-accent" onclick="enviarProposta()">
+    <i class="bi bi-send-fill"></i> Enviar Proposta — R$ <span id="btnValue">850,00</span>
+  </button>
+
+</div><!-- /main-wrap -->
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-modal">
+    <div class="big-icon"><i class="bi bi-check-lg"></i></div>
+    <h4>Lance Registrado!</h4>
+    <p>Sua proposta foi enviada com sucesso e está aguardando resposta do anunciante.</p>
+    <div class="lance-code" id="lanceCode">LNC · 2026 · B7C3 · 0941</div>
+    <button class="btn-primary-green mb-2" onclick="closeSuccess()">
+      <i class="bi bi-list-ul"></i> Ver Minhas Propostas
+    </button>
+    <button class="btn-secondary-outline" onclick="closeSuccess()">
+      <i class="bi bi-search"></i> Buscar Outras Ofertas
+    </button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap d-none" id="toastWrap">
+  <div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill" style="font-size:1.1rem; color:var(--green-light);"></i>
+    <span id="toastText">Ação realizada!</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateFromRange() {
+    const val = document.getElementById('priceRange').value;
+    document.getElementById('priceInput').value = val;
+    syncAll(val);
+  }
+
+  function updateFromInput() {
+    const val = document.getElementById('priceInput').value;
+    document.getElementById('priceRange').value = val;
+    syncAll(val);
+  }
+
+  function syncAll(val) {
+    const num = parseFloat(val) || 0;
+    const fmt = num.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    document.getElementById('rangeLabel').textContent = 'R$ ' + num.toLocaleString('pt-BR');
+    document.getElementById('summaryBid').textContent = 'R$ ' + fmt;
+    document.getElementById('myBidValue').textContent = 'R$ ' + num.toLocaleString('pt-BR');
+    document.getElementById('btnValue').textContent = fmt;
+
+    // position feedback
+    const status = num >= 921 ? '🥇 Você está em 1º!' : num >= 701 ? '2º lugar' : '3º lugar ou abaixo';
+    document.getElementById('summaryStatus').textContent = status;
+
+    // clear quick bid selection
+    document.querySelectorAll('.quick-bid').forEach(b => b.classList.remove('selected'));
+  }
+
+  function setQuickBid(val) {
+    document.getElementById('priceInput').value = val;
+    document.getElementById('priceRange').value = val;
+    syncAll(val);
+    document.querySelectorAll('.quick-bid').forEach(b => {
+      b.classList.toggle('selected', parseInt(b.textContent.replace(/\D/g,'')) === val);
+    });
+  }
+
+  function enviarProposta() {
+    // Simula validação KYC (Passo 3 do fluxo)
+    showToast('🔍 Validando KYC...');
+    setTimeout(() => {
+      showToast('✅ KYC validado! Registrando lance...');
+      setTimeout(() => {
+        document.getElementById('successOverlay').classList.add('show');
+      }, 1200);
+    }, 1000);
+  }
+
+  function closeSuccess() {
+    document.getElementById('successOverlay').classList.remove('show');
+    showToast('🎉 Proposta registrada com sucesso!');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    const wrap = document.getElementById('toastWrap');
+    document.getElementById('toastText').textContent = msg;
+    wrap.classList.remove('d-none');
+    toastTimer = setTimeout(() => wrap.classList.add('d-none'), 3000);
+  }
+</script>
+</body>
+</html>
