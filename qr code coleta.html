@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Code — Confirmar Coleta & Gerar Comprovante</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --green-deep: #1a3a2a;
+      --green-mid:  #2d6a4f;
+      --green-bright: #52b788;
+      --green-light: #b7e4c7;
+      --accent: #f4a261;
+      --accent-soft: #fde8d0;
+      --bg: #f0f7f2;
+      --card-bg: #ffffff;
+      --text-main: #1a2e22;
+      --text-muted: #6b8c78;
+      --border: #d8eddf;
+      --mono: 'Space Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      font-family: var(--sans);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .topbar {
+      background: var(--green-deep);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar .brand {
+      font-family: var(--mono);
+      font-size: .78rem;
+      color: var(--green-light);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .topbar .uc-badges {
+      display: flex;
+      gap: 8px;
+    }
+    .uc-badge {
+      background: var(--green-mid);
+      color: var(--green-light);
+      font-family: var(--mono);
+      font-size: .65rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: .05em;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, var(--green-mid) 0%, var(--green-deep) 100%);
+      padding: 40px 24px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: rgba(82,183,136,.15);
+      border-radius: 50%;
+      top: -80px; right: -60px;
+    }
+    .page-header h1 {
+      font-family: var(--mono);
+      font-size: 1.3rem;
+      color: #fff;
+      margin-bottom: 4px;
+      position: relative;
+    }
+    .page-header p {
+      color: var(--green-light);
+      font-size: .88rem;
+      margin: 0;
+      position: relative;
+    }
+    .step-pills {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .step-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 24px;
+      padding: 6px 14px;
+      font-size: .78rem;
+      color: #fff;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .step-pill.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--green-deep);
+      font-weight: 600;
+    }
+    .step-pill .num {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .65rem;
+      font-family: var(--mono);
+    }
+    .step-pill.active .num {
+      background: var(--green-deep);
+      color: #fff;
+    }
+    .step-pill.done { background: rgba(82,183,136,.3); border-color: var(--green-bright); }
+    .step-pill.done .num { background: var(--green-bright); color: var(--green-deep); }
+
+    .main-wrap { padding: 28px 16px 60px; max-width: 860px; margin: 0 auto; }
+
+    .offer-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(26,58,42,.06);
+    }
+    .offer-thumb {
+      width: 72px; height: 72px;
+      border-radius: 10px;
+      background: var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .offer-meta .tag {
+      display: inline-block;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: .68rem;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .offer-meta h5 {
+      font-size: .98rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .offer-meta .sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+    }
+    .offer-meta .sub i { margin-right: 4px; }
+    .status-chip {
+      margin-left: auto;
+      background: #fff7ed;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      font-size: .72rem;
+      font-family: var(--mono);
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .section-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(26,58,42,.06);
+    }
+    .section-title {
+      font-family: var(--mono);
+      font-size: .72rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--green-mid);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .qr-outer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+    }
+    .qr-frame {
+      position: relative;
+      width: 200px; height: 200px;
+      border-radius: 18px;
+      background: #fff;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 24px rgba(26,58,42,.10);
+      overflow: hidden;
+    }
+    .qr-frame svg {
+      width: 170px; height: 170px;
+    }
+    .qr-corner {
+      position: absolute;
+      width: 22px; height: 22px;
+      border-color: var(--green-mid);
+      border-style: solid;
+    }
+    .qr-corner.tl { top: 6px; left: 6px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+    .qr-corner.tr { top: 6px; right: 6px; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+    .qr-corner.bl { bottom: 6px; left: 6px; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+    .qr-corner.br { bottom: 6px; right: 6px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+    .qr-token {
+      margin-top: 14px;
+      font-family: var(--mono);
+      font-size: .82rem;
+      color: var(--text-muted);
+      letter-spacing: .2em;
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      padding: 6px 16px;
+      border-radius: 8px;
+    }
+    .qr-hint {
+      font-size: .78rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      text-align: center;
+    }
+    .qr-hint i { color: var(--green-bright); margin-right: 4px; }
+
+    .scan-area {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .scan-input-wrap {
+      position: relative;
+    }
+    .scan-input-wrap input {
+      font-family: var(--mono);
+      font-size: .9rem;
+      letter-spacing: .1em;
+      padding: 14px 50px 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      width: 100%;
+      background: var(--bg);
+      color: var(--text-main);
+      transition: border-color .2s;
+    }
+    .scan-input-wrap input:focus {
+      outline: none;
+      border-color: var(--green-bright);
+      background: #fff;
+    }
+    .scan-input-wrap .scan-icon {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--green-mid);
+      font-size: 1.2rem;
+    }
+    .btn-scan {
+      background: var(--green-mid);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 20px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: .9rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+    }
+    .btn-scan:hover { background: var(--green-deep); transform: translateY(-1px); }
+
+    .success-banner {
+      background: linear-gradient(135deg, #e8f8ef 0%, #d4f0e1 100%);
+      border: 1.5px solid var(--green-bright);
+      border-radius: 12px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .success-icon {
+      width: 44px; height: 44px;
+      background: var(--green-mid);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .success-banner h6 { margin: 0 0 2px; font-weight: 600; color: var(--green-deep); font-size: .9rem; }
+    .success-banner p  { margin: 0; font-size: .78rem; color: var(--green-mid); }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .checklist-item:last-child { border-bottom: none; }
+    .check-box {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .check-box.checked {
+      background: var(--green-mid);
+      border-color: var(--green-mid);
+      color: #fff;
+      font-size: .8rem;
+    }
+    .checklist-item label {
+      font-size: .88rem;
+      cursor: pointer;
+      flex: 1;
+    }
+    .checklist-item .item-tag {
+      font-family: var(--mono);
+      font-size: .62rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .receipt-preview {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .83rem;
+    }
+    .receipt-row:last-child { border-bottom: none; }
+    .receipt-row .label { color: var(--text-muted); }
+    .receipt-row .value { font-family: var(--mono); font-size: .8rem; color: var(--text-main); font-weight: 700; }
+    .receipt-row .value.green { color: var(--green-mid); }
+
+    .btn-primary-green {
+      background: var(--green-mid);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 24px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: .92rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background .2s, box-shadow .2s;
+      margin-bottom: 10px;
+    }
+    .btn-primary-green:hover {
+      background: var(--green-deep);
+      box-shadow: 0 4px 16px rgba(45,106,79,.3);
+    }
+    .btn-secondary-outline {
+      background: transparent;
+      color: var(--green-mid);
+      border: 2px solid var(--green-mid);
+      border-radius: 12px;
+      padding: 13px 24px;
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: .92rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-secondary-outline:hover {
+      background: var(--green-mid);
+      color: #fff;
+    }
+
+    .esg-strip {
+      background: linear-gradient(90deg, var(--green-deep) 0%, var(--green-mid) 100%);
+      border-radius: 12px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .esg-strip i { font-size: 1.6rem; color: var(--green-light); }
+    .esg-strip .esg-label { font-size: .72rem; color: var(--green-light); font-family: var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .esg-strip .esg-value { font-size: 1rem; font-weight: 600; margin-top: 2px; }
+
+    .toast-wrap {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      min-width: 280px;
+    }
+    .toast-msg {
+      background: var(--green-deep);
+      color: #fff;
+      border-radius: 12px;
+      padding: 14px 20px;
+      font-size: .85rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(26,58,42,.3);
+      animation: slideUp .3s ease;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @media(max-width: 576px) {
+      .offer-card { flex-wrap: wrap; }
+      .status-chip { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">♻ Circuito Sustentável</span>
+</div>
+
+<div class="page-header">
+  <h1><i class="bi bi-qr-code-scan me-2"></i>Confirmar Coleta & Comprovante</h1>
+  <p>Validação via QR Code e geração do registro de transação</p>
+  <div class="step-pills">
+    <div class="step-pill done">
+      <span class="num"><i class="bi bi-check" style="font-size:.6rem;"></i></span> Oferta Reservada
+    </div>
+    <div class="step-pill done">
+      <span class="num"><i class="bi bi-check" style="font-size:.6rem;"></i></span> Agendamento Confirmado
+    </div>
+    <div class="step-pill active">
+      <span class="num">3</span> Confirmar Coleta
+    </div>
+    <div class="step-pill">
+      <span class="num">4</span> Comprovante
+    </div>
+  </div>
+</div>
+
+<div class="main-wrap">
+
+  <div class="offer-card">
+    <div class="offer-thumb">🖥️</div>
+    <div class="offer-meta flex-grow-1">
+      <span class="tag">Hardware</span>
+      <h5>Lote de Computadores — 4 unidades</h5>
+      <div class="sub"><i class="bi bi-geo-alt-fill"></i> Av. Brasil, 1240 — Maringá, PR</div>
+      <div class="sub mt-1"><i class="bi bi-calendar3"></i> Retirada: Hoje, 14h–16h</div>
+    </div>
+    <div class="status-chip">● RESERVADO</div>
+  </div>
+
+  <div class="row g-4 mb-0">
+
+    <div class="col-md-6">
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-qr-code text-success"></i> QR Code da Oferta</div>
+        <div class="qr-outer">
+          <div class="qr-frame">
+            <div class="qr-corner tl"></div>
+            <div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div>
+            <div class="qr-corner br"></div>
+            <svg viewBox="0 0 37 37" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+              <rect width="37" height="37" fill="white"/>
+              <rect x="1" y="1" width="7" height="7" fill="#1a3a2a"/>
+              <rect x="2" y="2" width="5" height="5" fill="white"/>
+              <rect x="3" y="3" width="3" height="3" fill="#1a3a2a"/>
+              <rect x="29" y="1" width="7" height="7" fill="#1a3a2a"/>
+              <rect x="30" y="2" width="5" height="5" fill="white"/>
+              <rect x="31" y="3" width="3" height="3" fill="#1a3a2a"/>
+              <rect x="1" y="29" width="7" height="7" fill="#1a3a2a"/>
+              <rect x="2" y="30" width="5" height="5" fill="white"/>
+              <rect x="3" y="31" width="3" height="3" fill="#1a3a2a"/>
+              <rect x="9" y="1" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="11" y="1" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="15" y="1" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="1" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="1" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="3" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="13" y="3" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="3" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="3" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="25" y="3" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="5" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="5" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="5" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="19" y="5" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="23" y="5" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="1" y="9" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="3" y="9" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="7" y="9" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="9" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="9" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="23" y="9" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="26" y="9" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="2" y="11" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="11" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="11" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="14" y="11" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="18" y="11" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="11" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="27" y="11" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="1" y="13" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="13" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="10" y="13" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="13" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="20" y="13" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="24" y="13" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="28" y="13" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="2" y="15" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="5" y="15" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="11" y="15" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="15" y="15" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="15" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="25" y="15" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="1" y="17" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="7" y="17" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="17" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="17" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="17" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="28" y="17" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="3" y="19" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="8" y="19" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="13" y="19" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="19" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="20" y="19" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="24" y="19" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="27" y="19" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="1" y="21" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="5" y="21" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="11" y="21" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="21" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="21" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="26" y="21" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="2" y="23" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="7" y="23" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="10" y="23" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="15" y="23" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="19" y="23" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="23" y="23" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="27" y="23" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="25" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="13" y="25" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="18" y="25" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="25" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="27" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="27" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="27" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="27" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="25" y="27" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="29" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="14" y="29" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="29" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="29" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="26" y="29" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="31" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="13" y="31" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="18" y="31" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="31" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="27" y="31" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="33" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="33" width="4" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="33" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="21" y="33" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="24" y="33" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="9" y="35" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="13" y="35" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="17" y="35" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="35" width="2" height="1" fill="#1a3a2a"/>
+              <rect x="26" y="35" width="3" height="1" fill="#1a3a2a"/>
+              <rect x="8" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="10" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="12" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="14" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="16" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="18" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="20" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="22" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="24" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="26" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="28" y="6" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="8" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="10" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="12" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="14" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="16" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="18" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="20" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="22" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="24" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="26" width="1" height="1" fill="#1a3a2a"/>
+              <rect x="6" y="28" width="1" height="1" fill="#1a3a2a"/>
+            </svg>
+          </div>
+          <div class="qr-token">TKN · A9F2 · 7B3C · 4E1D</div>
+          <p class="qr-hint"><i class="bi bi-shield-check"></i> Válido por 30 minutos após exibição</p>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+          <button class="btn-secondary-outline" style="width:50%; font-size:.82rem; padding:10px;" onclick="showToast('📤 QR Code compartilhado!')">
+            <i class="bi bi-share"></i> Compartilhar
+          </button>
+          <button class="btn-secondary-outline" style="width:50%; font-size:.82rem; padding:10px;" onclick="showToast('🔄 Novo código gerado!')">
+            <i class="bi bi-arrow-clockwise"></i> Regenerar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-camera text-success"></i> Leitura do Código</div>
+        <div class="scan-area">
+          <p style="font-size:.83rem; color:var(--text-muted); margin:0;">
+            O coletor deve escanear o QR Code apresentado pelo doador para confirmar a coleta. Insira o token manualmente se necessário.
+          </p>
+
+          <div class="success-banner d-none" id="successBanner">
+            <div class="success-icon"><i class="bi bi-check-lg"></i></div>
+            <div>
+              <h6>Código Validado com Sucesso!</h6>
+              <p>Token: TKN·A9F2·7B3C·4E1D — 01/04/2026 às 14h23</p>
+            </div>
+          </div>
+
+          <div id="inputArea">
+            <label style="font-size:.78rem; color:var(--text-muted); margin-bottom:6px; display:block;">
+              Token do QR Code
+            </label>
+            <div class="scan-input-wrap">
+              <input type="text" id="tokenInput" placeholder="TKN·XXXX·XXXX·XXXX" maxlength="20"/>
+              <i class="bi bi-upc-scan scan-icon"></i>
+            </div>
+
+            <button class="btn-scan w-100 mt-2" onclick="validateToken()">
+              <i class="bi bi-camera-fill"></i> Usar Câmera para Escanear
+            </button>
+            <button class="btn-primary-green mt-2" onclick="validateToken()">
+              <i class="bi bi-check2-circle"></i> Validar Token
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <div class="section-title"><i class="bi bi-clipboard-check text-success"></i> Checklist de Entrega</div>
+
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box checked"><i class="bi bi-check"></i></div>
+          <label>Quantidade de itens confere com o anúncio</label>
+          <span class="item-tag">RB-04</span>
+        </div>
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box checked"><i class="bi bi-check"></i></div>
+          <label>Nenhum item com risco químico identificado</label>
+          <span class="item-tag">RB-02</span>
+        </div>
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <label>Situação dos dados declarada (removido/contém)</label>
+          <span class="item-tag">RB-04</span>
+        </div>
+        <div class="checklist-item" onclick="toggleCheck(this)">
+          <div class="check-box"></div>
+          <label>Material acondicionado para transporte seguro</label>
+          <span class="item-tag">RF-05</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="esg-strip mt-3">
+    <i class="bi bi-tree-fill"></i>
+    <div class="flex-grow-1">
+      <div class="esg-label">Impacto ESG estimado desta coleta</div>
+      <div class="esg-value">≈ 18,4 kg de resíduos eletrônicos evitados em aterro</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:.68rem; color:var(--green-light); font-family:var(--mono);">MÉTRICA DE IMPACTO</div>
+      <div style="font-size:.95rem; font-weight:700;">+ 240 pts</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="section-title"><i class="bi bi-file-earmark-pdf text-success"></i> Pré-visualização do Comprovante</div>
+
+    <div class="receipt-preview">
+      <div class="receipt-row">
+        <span class="label">Nº da Transação</span>
+        <span class="value">#TRX-20260401-9183</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Data / Hora</span>
+        <span class="value">01/04/2026 — 14:23</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Doador</span>
+        <span class="value">Carlos M. ★ 4.8</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Coletor</span>
+        <span class="value">RecicloTech Ltda.</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Itens coletados</span>
+        <span class="value">4 unid. — Hardware</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Peso estimado</span>
+        <span class="value">18,4 kg</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Token validado</span>
+        <span class="value green">✔ TKN·A9F2·7B3C·4E1D</span>
+      </div>
+      <div class="receipt-row">
+        <span class="label">Status final</span>
+        <span class="value green">CONCLUÍDA</span>
+      </div>
+    </div>
+
+    <div class="row g-2 mt-3">
+      <div class="col-6">
+        <button class="btn-primary-green mb-0" onclick="showToast('📄 Comprovante PDF gerado!')">
+          <i class="bi bi-file-earmark-arrow-down"></i> Baixar PDF
+        </button>
+      </div>
+      <div class="col-6">
+        <button class="btn-secondary-outline" onclick="showToast('✉ Comprovante enviado por e-mail!')">
+          <i class="bi bi-envelope"></i> Enviar por E-mail
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary-green" style="font-size:1rem; padding:16px;" onclick="confirmarColeta()">
+    <i class="bi bi-bag-check-fill"></i> Confirmar Coleta e Finalizar Oferta
+  </button>
+
+</div>
+
+<div class="toast-wrap d-none" id="toastWrap">
+  <div class="toast-msg" id="toastMsg">
+    <i class="bi bi-check-circle-fill" style="font-size:1.1rem; color:var(--green-light);"></i>
+    <span id="toastText">Ação realizada!</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function toggleCheck(el) {
+    const box = el.querySelector('.check-box');
+    box.classList.toggle('checked');
+    if (box.classList.contains('checked')) {
+      box.innerHTML = '<i class="bi bi-check"></i>';
+    } else {
+      box.innerHTML = '';
+    }
+  }
+
+  function validateToken() {
+    const input = document.getElementById('tokenInput').value.trim();
+    const valid  = input === '' || input.length >= 4; 
+    if (valid) {
+      document.getElementById('inputArea').classList.add('d-none');
+      document.getElementById('successBanner').classList.remove('d-none');
+      showToast('✅ Token validado! Coleta confirmada.');
+    } else {
+      showToast('❌ Token inválido. Tente novamente.');
+    }
+  }
+
+  function confirmarColeta() {
+    showToast('🎉 Oferta finalizada! Comprovante disponível.');
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    const wrap = document.getElementById('toastWrap');
+    document.getElementById('toastText').textContent = msg;
+    wrap.classList.remove('d-none');
+    toastTimer = setTimeout(() => wrap.classList.add('d-none'), 3000);
+  }
+</script>
+</body>
+</html>
